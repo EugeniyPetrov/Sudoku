@@ -2,9 +2,6 @@
 
 namespace EugeniyPetrov;
 
-require_once 'Exception/UnableToSolveException.php';
-require_once 'Exception/MultipleResultsException.php';
-
 class Sudoku {
     protected $_sudoku;
     protected $_rows;

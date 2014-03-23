@@ -1,8 +1,8 @@
 <?php
 
-require_once 'EugeniyPetrov/Sudoku.php';
+require_once 'vendor/autoload.php';
 
-$sudoku = new EugeniyPetrov\Sudoku([
+$sudoku = new \EugeniyPetrov\Sudoku([
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 1, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],

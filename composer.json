@@ -1,0 +1,12 @@
+{
+    "name": "eugeniypetrov/sudoku",
+    "description": "Small library to solve sudoku",
+    "require": {
+        "php": ">=5.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "EugeniyPetrov\\": "src/EugeniyPetrov/"
+        }
+    }
+}
