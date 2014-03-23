@@ -37,7 +37,7 @@ class Sudoku {
     protected function _setToRow($row, $number) {
         isset($this->_rows[$row]) or $this->_rows[$row] = array();
         if (isset($this->_rows[$row][$number])) {
-            throw new \InvalidArgumentException;
+            throw new \InvalidArgumentException('Number ' . $number . ' already exists in row ' . $row);
         }
         $this->_rows[$row][$number] = true;
     }
@@ -45,7 +45,7 @@ class Sudoku {
     protected function _setToCol($col, $number) {
         isset($this->_cols[$col]) or $this->_cols[$col] = array();
         if (isset($this->_cols[$col][$number])) {
-            throw new \InvalidArgumentException;
+            throw new \InvalidArgumentException('Number ' . $number . ' already exists in col ' . $col);
         }
         $this->_cols[$col][$number] = true;
     }
@@ -53,7 +53,7 @@ class Sudoku {
     protected function _setToSquare($square, $number) {
         isset($this->_squares[$square]) or $this->_squares[$square] = array();
         if (isset($this->_squares[$square][$number])) {
-            throw new \InvalidArgumentException;
+            throw new \InvalidArgumentException('Number ' . $number . ' already exists in square ' . $square);
         }
         $this->_squares[$square][$number] = true;
     }
@@ -63,8 +63,8 @@ class Sudoku {
      *
      * Algorithm works by counting the number of possible numbers for each cell and setting the only possible
      * numbers in their places until sudoku is not solved. It there are no any cells with only possible values
-     * trying to recursively solve sudoku with each possible values. Algorithm doesn't solve sudoku which have
-     * more than one solution and sudoku that doesn't have solutions at all.
+     * trying to recursively solve sudoku with each possible values. Throws UnableToSolveException if sudoku
+     * have no solutions
      *
      * @throws UnableToSolveException
      */
@@ -72,18 +72,22 @@ class Sudoku {
         for ($max_possible = 1; $max_possible <= 9; $max_possible++) {
             for ($row = 0; $row < 9; $row++) {
                 for ($col = 0; $col < 9; $col++) {
-                    if ($this->get($row, $col)) continue;
+                    if ($this->get($row, $col)) {
+                        continue;
+                    }
 
                     $possible_numbers = $this->_findPossible($row, $col, $max_possible + 1);
                     if (!$possible_numbers) {
-                        throw new UnableToSolveException('This sudoku have no solution');
+                        throw new UnableToSolveException;
                     }
 
                     if (count($possible_numbers) == 1) {
                         // if only one number is possible on given place - set it and begin from the start.
                         $this->set($row, $col, $possible_numbers[0]);
+                        $max_possible = 0;
                         $row = 0;
                         $col = 0;
+                        continue 3;
                     } elseif (count($possible_numbers) <= $max_possible) {
                         // if only many numbers is possible try each recursively until solved. Then raw-copy solved
                         // sudoku to the current one
@@ -98,6 +102,8 @@ class Sudoku {
                                 continue;
                             }
                         }
+
+                        throw new UnableToSolveException;
                     }
                 }
             }
@@ -106,8 +112,6 @@ class Sudoku {
                 return;
             }
         }
-
-        throw new MultipleResultsException('Probably this sudoku have more than one solution.');
     }
 
     public function isSolved() {

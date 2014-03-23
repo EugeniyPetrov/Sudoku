@@ -2,5 +2,7 @@
 
 namespace EugeniyPetrov;
 
-class UnableToSolveException extends \Exception {
+class UnableToSolveException extends \Exception
+{
+    protected $message = 'This sudoku have no solution';
 }
