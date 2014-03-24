@@ -2,15 +2,27 @@
 
 namespace EugeniyPetrov;
 
-class Sudoku {
-    protected $_sudoku;
-    protected $_rows;
-    protected $_cols;
-    protected $_squares;
+/**
+ * Class Sudoku
 
-    private $_remains_to_solve = 81;
+ * @author Eugeniy Petrov <eug.a.petrov@gmail.com>
+ */
+class Sudoku
+{
+    protected $sudoku;
+    protected $rows;
+    protected $cols;
+    protected $squares;
 
-    public function __construct(array $sudoku) {
+    private $remains_to_solve = 81;
+
+    /**
+     * @param array $sudoku bi-dimensional sudoku grid
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function __construct(array $sudoku)
+    {
         if (count($sudoku) != 9) {
             throw new \InvalidArgumentException;
         }
@@ -21,38 +33,76 @@ class Sudoku {
             }
 
             foreach ($cols as $col => $number) {
-                if (!$number) continue;
+                if (!$number) {
+                    continue;
+                }
                 $this->set($row, $col, $number);
             }
         }
     }
 
-    protected static function _getSquareNum($row, $col) {
-        return floor($col / 3) + floor($row / 3) * 3;
+    /**
+     * Get square number by row and col. Squares are counted from 0 to 9 starting from top left corner.
+     *
+     * @param int $row
+     * @param int $col
+     *
+     * @return int
+     */
+    protected static function getSquareNum($row, $col)
+    {
+        return (int)(floor($col / 3) + floor($row / 3) * 3);
     }
 
-    protected function _setToRow($row, $number) {
-        isset($this->_rows[$row]) or $this->_rows[$row] = array();
-        if (isset($this->_rows[$row][$number])) {
+    /**
+     * Set $number as present in specific $row
+     *
+     * @param int $row
+     * @param int $number
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected function setToRow($row, $number)
+    {
+        isset($this->rows[$row]) or $this->rows[$row] = array();
+        if (isset($this->rows[$row][$number])) {
             throw new \InvalidArgumentException('Number ' . $number . ' already exists in row ' . $row);
         }
-        $this->_rows[$row][$number] = true;
+        $this->rows[$row][$number] = true;
     }
 
-    protected function _setToCol($col, $number) {
-        isset($this->_cols[$col]) or $this->_cols[$col] = array();
-        if (isset($this->_cols[$col][$number])) {
+    /**
+     * Set $number as present in specific $col
+     *
+     * @param int $col
+     * @param int $number
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected function setToCol($col, $number)
+    {
+        isset($this->cols[$col]) or $this->cols[$col] = array();
+        if (isset($this->cols[$col][$number])) {
             throw new \InvalidArgumentException('Number ' . $number . ' already exists in col ' . $col);
         }
-        $this->_cols[$col][$number] = true;
+        $this->cols[$col][$number] = true;
     }
 
-    protected function _setToSquare($square, $number) {
-        isset($this->_squares[$square]) or $this->_squares[$square] = array();
-        if (isset($this->_squares[$square][$number])) {
+    /**
+     * Set $number as present in specific $square
+     *
+     * @param int $square square (counted from 0 to 9 starting from top left corner)
+     * @param int $number
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected function setToSquare($square, $number)
+    {
+        isset($this->squares[$square]) or $this->squares[$square] = array();
+        if (isset($this->squares[$square][$number])) {
             throw new \InvalidArgumentException('Number ' . $number . ' already exists in square ' . $square);
         }
-        $this->_squares[$square][$number] = true;
+        $this->squares[$square][$number] = true;
     }
 
     /**
@@ -65,7 +115,8 @@ class Sudoku {
      *
      * @throws UnableToSolveException
      */
-    public function solve() {
+    public function solve()
+    {
         for ($max_possible = 1; $max_possible <= 9; $max_possible++) {
             for ($row = 0; $row < 9; $row++) {
                 for ($col = 0; $col < 9; $col++) {
@@ -73,7 +124,7 @@ class Sudoku {
                         continue;
                     }
 
-                    $possible_numbers = $this->_findPossible($row, $col, $max_possible + 1);
+                    $possible_numbers = $this->findPossible($row, $col, $max_possible + 1);
                     if (!$possible_numbers) {
                         throw new UnableToSolveException;
                     }
@@ -111,44 +162,78 @@ class Sudoku {
         }
     }
 
-    public function isSolved() {
-        return !$this->_remains_to_solve;
+    /**
+     * Checks if sudoku solved
+     *
+     * @return bool
+     */
+    public function isSolved()
+    {
+        return !$this->remains_to_solve;
     }
 
-    public function set($row, $col, $number) {
-        $this->_sudoku[$row][$col] = $number;
+    /**
+     * Set $number at cell specified by $row and $col
+     *
+     * @param int $row
+     * @param int $col
+     * @param int $number
+     */
+    public function set($row, $col, $number)
+    {
+        $this->sudoku[$row][$col] = $number;
 
         // index rows, cols and squares to fast searching
-        $this->_setToRow($row, $number);
-        $this->_setToCol($col, $number);
-        $this->_setToSquare(self::_getSquareNum($row, $col), $number);
+        $this->setToRow($row, $number);
+        $this->setToCol($col, $number);
+        $this->setToSquare(self::getSquareNum($row, $col), $number);
 
-        $this->_remains_to_solve--;
+        $this->remains_to_solve--;
     }
 
     /**
      * Raw copy of given sudoku to the current one.
      *
-     * @param Sudoku $sudoku
+     * @param Sudoku $sudoku object to copy from
      */
-    public function copy(self $sudoku) {
-        $this->_sudoku = $sudoku->_sudoku;
-        $this->_rows = $sudoku->_rows;
-        $this->_cols = $sudoku->_cols;
-        $this->_squares = $sudoku->_squares;
-        $this->_remains_to_solve = $sudoku->_remains_to_solve;
+    public function copy(self $sudoku)
+    {
+        $this->sudoku = $sudoku->sudoku;
+        $this->rows = $sudoku->rows;
+        $this->cols = $sudoku->cols;
+        $this->squares = $sudoku->squares;
+        $this->remains_to_solve = $sudoku->remains_to_solve;
     }
 
-    public function get($row, $col) {
-        return !empty($this->_sudoku[$row][$col]) ? $this->_sudoku[$row][$col] : null;
+    /**
+     * Get a $number at position $row, $col
+     *
+     * @param int $row
+     * @param int $col
+     *
+     * @return mixed
+     */
+    public function get($row, $col)
+    {
+        return !empty($this->sudoku[$row][$col]) ? $this->sudoku[$row][$col] : null;
     }
 
-    protected function _findPossible($row, $col, $limit = 0) {
+    /**
+     * Finds all possible numbers at given position.
+     *
+     * @param int $row
+     * @param int $col
+     * @param int $limit stop find process when $limit values found.
+     *
+     * @return array
+     */
+    protected function findPossible($row, $col, $limit = 0)
+    {
         $possible = array();
         for ($number = 1; $number <= 9; $number++) {
-            $in_row = !empty($this->_rows[$row][$number]);
-            $in_col = !empty($this->_cols[$col][$number]);
-            $in_square = !empty($this->_squares[self::_getSquareNum($row, $col)][$number]);
+            $in_row = !empty($this->rows[$row][$number]);
+            $in_col = !empty($this->cols[$col][$number]);
+            $in_square = !empty($this->squares[self::getSquareNum($row, $col)][$number]);
 
             if (!$in_row && !$in_col && !$in_square) {
                 $possible[] = $number;
@@ -160,7 +245,13 @@ class Sudoku {
         return $possible;
     }
 
-    public function __toString() {
+    /**
+     * String representation of sudoku.
+     *
+     * @return string
+     */
+    public function __toString()
+    {
         $str = '';
         for ($row = 0; $row < 9; $row++) {
             for ($col = 0; $col < 9; $col++) {

@@ -2,7 +2,9 @@
 
 require_once 'vendor/autoload.php';
 
-$sudoku = new \EugeniyPetrov\Sudoku([
+use \EugeniyPetrov\Sudoku;
+
+$sudoku = new Sudoku([
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
